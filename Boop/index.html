@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boop</title>
+</head>
+
+<body>
+    <table id="game">
+        <tr>
+            <th colspan="3">
+                <div id="title">
+                    <h2>Boop</h2>
+                </div>
+                <div id="settings">
+                    <button>Settings</button>
+                </div>
+
+
+            </th>
+        </tr>
+        <tr>
+
+            <td id="firstPlayerField">
+                <p id="p1clock" class="timer"></p>
+                <h3 id="p1name">Player1</h3>
+                <p id="p1Point">Points: 0</p>
+                <!-- <p id="p1Cats">Cats:</p> -->
+                <canvas id="p1canvas" width="200px" height="200px"></canvas>
+            </td>
+            <td id="gameField">
+                <ul id="menu">
+                    <li> <label for="p1newName">Player 1 name:</label>
+                        <input type="text" placeholder="Player1" value="Player1" id="p1newName">
+                    </li>
+                    <li>
+                        <label for="p2newName">Player 2 name:</label>
+                        <input type="text" placeholder="Player2" value="Player2" id="p2newName">
+                    </li>
+                    <li id="extendedMenu">
+                        <label for="pointGoal">Points to reach</label>
+                        <input type="number" id="pointGoal" min="1" value="5">
+                    </li>
+                    <li id="extendedMenu">
+                        <label for="width">Szélesség</label>
+                        <input type="number" id="width" value="6" min="2">
+                    </li>
+                    <li id="extendedMenu" >
+                        <label for="height">Magasság</label>
+                        <input type="number" id="height" value="6" min="2">
+                    </li>
+                    <li id="extendedMenu">
+                        <label for="maxCats">Number of cats per player</label>
+                        <input type="number" id="maxCats" value="8" min="1">
+                    </li>
+                    <li id="extendedMenu">
+                        <label for="alma">Időkorlát?</label>
+                        <input type="checkbox" name="alma" id="chkboxTimer">
+                        <input type="number" id="timeInput" value="180" disabled>
+                    </li>
+                    <li id="menuButtons"> 
+                        <button id="advanced">Advanced settings</button>
+                        <button id="new">Begin game</button>
+                    </li>
+                </ul>
+                <div id="board" hidden>
+
+                </div>
+                <div id="winScreen" hidden>
+                    <div></div>
+                    <button id="reset">Create new game</button>
+                    <button id="start" title="Start new game with the same settings">Rematch?</button> 
+                </div>
+
+
+            </td>
+            <td id="secondPlayerField">
+                <p id="p2clock" class="timer"></p>
+                <h3 id="p2name">Player2</h3>
+                <p id="p2Point">Points: 0</p>
+                <!-- <p id="p2Cats">Cats:</p> -->
+                <canvas id="p2canvas" width="200px" height="200px"></canvas>
+            </td>
+        </tr>
+    </table>
+    <ul id="records"></ul>
+    <script type="module" src="index.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+</body>
+
+</html>

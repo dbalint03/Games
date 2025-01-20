@@ -1,0 +1,10 @@
+{
+    "spellright.language": [
+        "hu"
+    ],
+    "spellright.documentTypes": [
+        "latex",
+        "plaintext"
+    ],
+    "liveServer.settings.port": 5501
+}

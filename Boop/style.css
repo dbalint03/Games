@@ -1,0 +1,187 @@
+#firstPlayerField{
+    border: 1px solid black;
+    text-align:center;
+    vertical-align: text-top;
+    font-family: 'Times New Roman';
+    width: 20%;
+    border-radius: 20px;
+
+    /* height: 200px; */
+}
+
+
+#gameField {
+    border-collapse: collapse;
+    text-align: center;
+    align-items: center;
+    font-family: 'Times New Roman';
+    width: 60%;
+    border-radius: 20px;
+}
+
+#secondPlayerField{
+    border: 1px solid black;
+    text-align: center;
+    vertical-align: text-top;
+    font-family: 'Times New Roman';
+    width: 20%;
+    border-radius: 20px;
+}
+
+
+#gameBoard td>button {
+    display: block;
+    border: none;
+    border-color: transparent;
+    width: 50px;
+    height: 50px;
+    border: 0;
+    font-size: 2rem;
+    text-align: center;
+    vertical-align: center;
+    margin: 0;
+    background-color: darkorchid;
+}
+
+#gameBoard td>button>img {
+    margin: auto;
+    text-align: center;    
+}
+
+#gameBoard {
+    margin: auto;
+}
+#gameBoard td {
+    width: auto;
+    border: transparent;
+}
+
+#game {
+    width: 800px;
+    margin: 30px auto;
+    min-height: 400px;
+    background-color: #a1a168ad;
+    border-radius: 20px;
+    
+}
+
+#game tr {
+    border-radius: 20px;
+}
+
+#game th {
+    border: 2px solid red;
+    text-align: left;
+    height: 80px;
+    border-radius: 20px;
+    
+}
+
+#title {
+    float: none;
+    display:inline;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+}
+
+#settings {
+    float: right;
+    display: inline;
+    vertical-align: middle;
+
+}
+#settings>button {
+    vertical-align: middle;
+}
+
+
+
+body {
+    text-align: center;
+    background-color: #666699;
+}
+
+.transform {
+    transition: all 0.5s;
+    translate: 50px;
+
+
+}
+
+#gameBoard table {
+    margin: auto;
+}
+
+#menu {
+    list-style-type: none;
+    text-align: center;
+    margin: auto;
+    padding: 0;
+}
+
+#new {
+    background-color: #008800;
+    border: none;
+    color: white;
+    font-size: 18px;
+    margin-top: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+#advanced {
+    background-color: #e5c35b;
+    border: none;
+    color: white;
+    font-size: 14px;
+    margin-top: 10px;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+#extendedMenu {
+    display: none;
+}
+
+.timer {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+#winScreen>div>h1 {
+    color: #39cc39;
+}
+
+#winScreen>div>h3 {
+    color: #b13434;
+}
+
+#start{
+    background-color: #008800;
+    border: none;
+    color: white;
+    font-size: 18px;
+    margin-top: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+#reset{
+    background-color: #bb8f3d;
+    border: none;
+    color: white;
+    font-size: 18px;
+    margin-top: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+#records{
+    list-style-type: none;
+}
+
+#records>li {
+    padding-top: 5px;
+    font-size:medium;
+}
