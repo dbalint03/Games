@@ -1,5 +1,6 @@
 "use strict";
 import { Tile } from "./tile.js";
+
 const gameArea = document.querySelector(".gameArea");
 const newButton = document.querySelector("#newGame");
 const nextGenButton = document.querySelector("#nextGen");
@@ -9,9 +10,19 @@ const saveButton = document.querySelector("#save");
 const loadButton = document.querySelector("#load");
 const startButton = document.querySelector("#start");
 const stopButton = document.querySelector("#stop");
+const exportButton = document.querySelector("#export");
+const importModalButton = document.querySelector("#import");
+const copyButton = document.querySelector(".copy-button");
 const intervalInput = document.querySelector("#interval");
+const jsonTextArea = document.querySelector("#jsonStringArea");
 const helpButton = document.querySelector("#help");
 const ctx = gameArea.getContext("2d");
+
+let exportModal = document.getElementById("exportModal");
+let importmodal = document.getElementById("importModal");
+let modals = document.querySelectorAll(".modal");
+let modalCloseButton = document.querySelectorAll(".close");
+let importButton = document.querySelector(".import-button");
 
 const tileSize = 15;
 const lineWidth = 2;
@@ -58,17 +69,13 @@ window.addEventListener("keydown", function (e) {
 
 function saveGame() {
   localStorage.setItem("tiles", JSON.stringify(tiles));
+  showToast("Game saved to local storage");
 }
 saveButton.addEventListener("click", saveGame);
 
-function loadGame() {
+function loadGame(data) {
   console.log(tiles);
 
-  let data = JSON.parse(localStorage.getItem("tiles"));
-  // if (data.length != tiles.length || data[0].length != tiles[0].length) {
-  //   window.alert('the saved and current game sizes dont match!');
-  //   return;
-  // }
   colNum = data.length;
   rowNum = data[0].length;
   widthInput.value = colNum;
@@ -86,10 +93,78 @@ function loadGame() {
   }
   console.log(tiles);
 }
-loadButton.addEventListener("click", loadGame);
+
+loadButton.addEventListener("click", () => {
+  let data = JSON.parse(localStorage.getItem("tiles"));
+  loadGame(data);
+  showToast("Game loaded from local storage");
+});
+
+function exportGame() {
+  jsonTextArea.textContent = JSON.stringify(tiles);
+  exportModal.style.display = "block";
+  document.body.style.overflow = "hidden"; // Disable scrolling
+}
+exportButton.addEventListener("click", exportGame);
+
+function importGame() {
+  importmodal.style.display = "block";
+}
+importModalButton.addEventListener("click", importGame);
+
+modalCloseButton.forEach((button) => {
+  button.addEventListener("click", () => {
+    const modal = button.closest(".modal"); // assumes modals have class="modal"
+    if (modal) {
+      modal.style.display = "none";
+    }
+  });
+});
+
+modals.forEach((modal) => {
+  modal.addEventListener("click", (event) => {
+    // Only close if the user clicks *outside* the modal content
+    if (event.target === modal) {
+      modal.style.display = "none";
+      document.body.style.overflow = ""; // Restore scrolling
+    }
+  });
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    modals.forEach((modal) => {
+      if (modal.style.display === "block") {
+        modal.style.display = "none";
+      }
+    });
+    document.body.style.overflow = ""; // Restore scrolling
+  }
+});
+
+function copyToClipboard() {
+  const text = jsonTextArea.textContent;
+  navigator.clipboard.writeText(text);
+  showToast("Copied to clipboard!");
+}
+copyButton.addEventListener("click", copyToClipboard);
+
+importButton.addEventListener("click", function () {
+  const jsonString = document.querySelector(".json-box").value;
+  // showToast("Importing board from JSON...");
+  if (isJsonString(jsonString)) {
+    loadGame(JSON.parse(jsonString));
+    importmodal.style.display = "none";
+    document.body.style.overflow = ""; // Restore scrolling
+  } else {
+    showToast("JSON parsing error");
+  }
+});
 
 function showHelp() {
-  window.alert('p - start/stop simulation \nn - next generation\nRules based on nearby live cells: \nLess than 2->dies, 2-3->stays alive, 3+-> dead \nif dead and 3 live nearby -> becomes live');
+  window.alert(
+    "p - start/stop simulation \nn - next generation\nRules based on nearby live cells: \nLess than 2->dies, 2-3->stays alive, 3+-> dead \nif dead and 3 live nearby -> becomes live"
+  );
 }
 helpButton.addEventListener("click", showHelp);
 
@@ -102,7 +177,6 @@ function NewGame() {
       tiles[x][y] = new Tile();
     }
   }
-  //  tiles = [colNum][rowNum];
   gameArea.height = height;
   gameArea.width = width;
   renderBoard();
@@ -139,6 +213,7 @@ function HandleNextGeneration() {
   }
 }
 nextGenButton.addEventListener("click", HandleNextGeneration);
+
 window.addEventListener("keydown", function (e) {
   if (e.key == "n") {
     e.preventDefault();
@@ -159,7 +234,6 @@ function HandleCellClick(event) {
     tiles[x][y].isLive = true;
   }
   tiles[x][y].neighbourCount = 0;
-  // countNeightbours(x, y);
 }
 gameArea.addEventListener("click", HandleCellClick);
 
@@ -175,7 +249,6 @@ gameArea.addEventListener("contextmenu", HandleRightClick);
 function renderBoard() {
   ctx.lineWidth = lineWidth;
   ctx.strokeStyle = "lightgray";
-  //   ctx.strokeRect(0, 0, gameArea.width, gameArea.height);
   console.log(rowNum);
 
   for (let i = 0; i < rowNum + 1; i++) {
@@ -199,7 +272,6 @@ function getClickedTilePos(event) {
   console.log(`y: ${y}`);
   let realX = Math.floor(x / tileSize);
   let realY = Math.floor(y / tileSize);
-  // console.log(Math.floor(y/50));
   return [realX, realY];
 }
 
@@ -227,4 +299,24 @@ function countNeightbours(x, y) {
       }
     }
   }
+}
+
+function showToast(message) {
+  let toast = document.querySelector(".toast");
+  toast.innerHTML += message;
+  toast.classList.add("toast-show");
+
+  setTimeout(function () {
+    toast.innerHTML = "";
+    toast.classList.remove("toast-show");
+  }, 3000);
+}
+
+function isJsonString(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
 }

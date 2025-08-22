@@ -1,27 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head >
+  <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href=".">
+    <base href="." />
     <title>Document</title>
+    <link href="./style.css" rel="stylesheet" />
   </head>
   <body>
     <label for="width">Szélesség</label>
-    <input type="number" id="width" min="4" max="1000" value="10">
+    <input type="number" id="width" min="4" max="1000" value="100" />
     <label for="height">Magasság</label>
-    <input type="number" id="height" min="4" max="1000" value="10">
-    <button id="newGame">Új játék</button>
-    <button id="nextGen">Next gen</button>
-    <button id="start">Start simulation</button>
+    <input type="number" id="height" min="4" max="1000" value="100" />
+    <button class="button" id="newGame">Új játék</button>
+    <button class="button" id="nextGen">Next gen</button>
+    <button class="button" id="start">Start simulation</button>
     <label for="interval">Delay (ms)</label>
-    <input type="number" name="interval" id="interval" value="100" min="20">
-    <button id="stop">Stop simulation</button>
-    <button id="save">Save</button>
-    <button id="load">Load</button>
-    <button id="help">How to play</button>
-    <div >
+    <input type="number" name="interval" id="interval" value="100" min="20" />
+    <button class="button" id="stop">Stop simulation</button>
+    <button class="button" id="save">Save</button>
+    <button class="button" id="load">Load</button>
+    <button class="button" id="export">Export</button>
+    <button class="button" id="import">Import</button>
+    <button class="button" id="help">How to play</button>
+    <div class="toast"></div>
+    <div id="exportModal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <div class="content">
+          <h3>Export current board as JSON</h3>
+          <textarea readonly="true" class="json-box" id="jsonStringArea">lOREM iPSUM</textarea>
+          <span class="copy-button" ><img src="./copy-icon.jpg" alt="" class="copy-icon"></span>
+        </div>
+      </div>
+    </div>
+    <div id="importModal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <div class="content">
+          <h3>Import board from JSON</h3>
+          <textarea class="json-box" id="jsonStringArea">lOREM iPSUM</textarea>
+          <button class="button import-button" >Import</button>
+        </div>
+      </div>
+    </div>
+    <div>
       <canvas class="gameArea"></canvas>
     </div>
     <script type="module" src="index.js"></script>
