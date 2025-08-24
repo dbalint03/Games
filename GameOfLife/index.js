@@ -1,5 +1,4 @@
 "use strict";
-import { Tile } from "./tile.js";
 
 const gameArea = document.querySelector(".gameArea");
 const newButton = document.querySelector("#newGame");
@@ -15,6 +14,7 @@ const importModalButton = document.querySelector("#import");
 const copyButton = document.querySelector(".copy-button");
 const intervalInput = document.querySelector("#interval");
 const jsonTextArea = document.querySelector("#jsonStringArea");
+const jsonImportBox = document.querySelector("#jsonImportBox");
 const helpButton = document.querySelector("#help");
 const ctx = gameArea.getContext("2d");
 
@@ -33,6 +33,7 @@ let height;
 let width;
 
 let tiles = [];
+let newTiles = [];
 let interval = null;
 let delay = 100;
 let isRunning = false;
@@ -75,23 +76,13 @@ saveButton.addEventListener("click", saveGame);
 
 function loadGame(data) {
   console.log(tiles);
-
   colNum = data.length;
   rowNum = data[0].length;
   widthInput.value = colNum;
   heighthInput.value = rowNum;
   NewGame();
   tiles = data;
-  for (let x = 0; x < colNum; x++) {
-    for (let y = 0; y < rowNum; y++) {
-      if (tiles[x][y].isLive) {
-        colorTile(x, y, "black");
-      } else {
-        colorTile(x, y, "white");
-      }
-    }
-  }
-  console.log(tiles);
+  renderBoard();
 }
 
 loadButton.addEventListener("click", () => {
@@ -114,7 +105,7 @@ importModalButton.addEventListener("click", importGame);
 
 modalCloseButton.forEach((button) => {
   button.addEventListener("click", () => {
-    const modal = button.closest(".modal"); // assumes modals have class="modal"
+    const modal = button.closest(".modal");
     if (modal) {
       modal.style.display = "none";
     }
@@ -123,7 +114,6 @@ modalCloseButton.forEach((button) => {
 
 modals.forEach((modal) => {
   modal.addEventListener("click", (event) => {
-    // Only close if the user clicks *outside* the modal content
     if (event.target === modal) {
       modal.style.display = "none";
       document.body.style.overflow = ""; // Restore scrolling
@@ -150,8 +140,7 @@ function copyToClipboard() {
 copyButton.addEventListener("click", copyToClipboard);
 
 importButton.addEventListener("click", function () {
-  const jsonString = document.querySelector(".json-box").value;
-  // showToast("Importing board from JSON...");
+  const jsonString = jsonImportBox.value;
   if (isJsonString(jsonString)) {
     loadGame(JSON.parse(jsonString));
     importmodal.style.display = "none";
@@ -169,12 +158,16 @@ function showHelp() {
 helpButton.addEventListener("click", showHelp);
 
 function NewGame() {
+  colNum = parseInt(widthInput.value);
+  rowNum = parseInt(heighthInput.value);
   height = tileSize * rowNum + 1;
   width = tileSize * colNum + 1;
   for (let x = 0; x < colNum; x++) {
     tiles[x] = [];
+    newTiles[x] = [];
     for (let y = 0; y < rowNum; y++) {
-      tiles[x][y] = new Tile();
+      tiles[x][y] = false;
+      newTiles[x][y] = false;
     }
   }
   gameArea.height = height;
@@ -192,25 +185,17 @@ newButton.addEventListener("click", HandLeNewButton);
 function HandleNextGeneration() {
   for (let x = 0; x < colNum; x++) {
     for (let y = 0; y < rowNum; y++) {
-      countNeightbours(x, y);
-    }
-  }
-
-  for (let x = 0; x < colNum; x++) {
-    for (let y = 0; y < rowNum; y++) {
-      let currentTile = tiles[x][y];
-      if (currentTile.neighbourCount < 2) {
-        colorTile(x, y, "white");
-        currentTile.isLive = false;
-      } else if (currentTile.neighbourCount > 3) {
-        colorTile(x, y, "white");
-        currentTile.isLive = false;
-      } else if (!currentTile.isLive && currentTile.neighbourCount == 3) {
-        colorTile(x, y, "black");
-        currentTile.isLive = true;
+      let neighbourCount = countNeightbours(x, y);
+      let isAlive = tiles[x][y];
+      if (isAlive) {
+        newTiles[x][y] = neighbourCount === 2 || neighbourCount === 3;
+      } else {
+        newTiles[x][y] = neighbourCount === 3;
       }
     }
   }
+  [tiles, newTiles] = [newTiles, tiles];
+  renderBoard();
 }
 nextGenButton.addEventListener("click", HandleNextGeneration);
 
@@ -226,14 +211,14 @@ function HandleCellClick(event) {
   console.log(`x:${x}, y:${y}`);
   let currentTile = tiles[x][y];
   console.log(tiles[x][y]);
-  if (currentTile.isLive) {
+  if (currentTile) {
     colorTile(x, y, "white");
-    tiles[x][y].isLive = false;
+    tiles[x][y] = false;
   } else {
     colorTile(x, y, "black");
-    tiles[x][y].isLive = true;
+    tiles[x][y] = true;
   }
-  tiles[x][y].neighbourCount = 0;
+  renderBoard();
 }
 gameArea.addEventListener("click", HandleCellClick);
 
@@ -241,26 +226,35 @@ function HandleRightClick(event) {
   event.preventDefault();
   const [x, y] = getClickedTilePos(event);
   countNeightbours(x, y);
-  console.log(tiles[x][y].neighbourCount);
 }
 
 gameArea.addEventListener("contextmenu", HandleRightClick);
 
 function renderBoard() {
-  ctx.lineWidth = lineWidth;
-  ctx.strokeStyle = "lightgray";
-  console.log(rowNum);
+  ctx.clearRect(0, 0, width, height);
+  ctx.beginPath();
 
   for (let i = 0; i < rowNum + 1; i++) {
     ctx.moveTo(0, i * tileSize);
     ctx.lineTo(width, i * tileSize);
-    ctx.stroke();
   }
 
   for (let i = 0; i < colNum + 1; i++) {
     ctx.moveTo(i * tileSize, 0);
     ctx.lineTo(i * tileSize, height);
-    ctx.stroke();
+  }
+
+  ctx.lineWidth = lineWidth;
+  ctx.strokeStyle = "lightgray";
+  ctx.stroke();
+
+  for (let x = 0; x < colNum; x++) {
+    for (let y = 0; y < rowNum; y++) {
+      let currentTile = tiles[x][y];
+      if (currentTile) {
+        colorTile(x, y, "black");
+      }
+    }
   }
 }
 
@@ -286,19 +280,20 @@ function colorTile(x, y, color) {
 }
 
 function countNeightbours(x, y) {
-  tiles[x][y].neighbourCount = 0;
+  let neighbourCount = 0;
   for (let dx = -1; dx <= 1; dx++) {
     for (let dy = -1; dy <= 1; dy++) {
       if (
         tiles[x + dx] &&
         tiles[x + dx][y + dy] &&
         !(x == x + dx && y == y + dy) &&
-        tiles[x + dx][y + dy].isLive
+        tiles[x + dx][y + dy]
       ) {
-        tiles[x][y].neighbourCount += 1;
+        neighbourCount += 1;
       }
     }
   }
+  return neighbourCount;
 }
 
 function showToast(message) {
