@@ -1,10 +1,12 @@
 "use strict";
 
+import { ZoomPanCanvas } from "./modules/zoomPanCanvas.js";
+
 const gameArea = document.querySelector(".gameArea");
 const newButton = document.querySelector("#newGame");
 const nextGenButton = document.querySelector("#nextGen");
 const widthInput = document.querySelector("#width");
-const heighthInput = document.querySelector("#height");
+const heightInput = document.querySelector("#height");
 const saveButton = document.querySelector("#save");
 const loadButton = document.querySelector("#load");
 const startButton = document.querySelector("#start");
@@ -16,8 +18,6 @@ const intervalInput = document.querySelector("#interval");
 const jsonTextArea = document.querySelector("#jsonStringArea");
 const jsonImportBox = document.querySelector("#jsonImportBox");
 const helpButton = document.querySelector("#help");
-const ctx = gameArea.getContext("2d");
-
 let exportModal = document.getElementById("exportModal");
 let importmodal = document.getElementById("importModal");
 let modals = document.querySelectorAll(".modal");
@@ -31,7 +31,8 @@ let rowNum;
 
 let height;
 let width;
-
+/** @type {ZoomPanCanvas} */
+let canvas;
 let tiles = [];
 let newTiles = [];
 let interval = null;
@@ -42,13 +43,13 @@ let isRunning = false;
 
 window.onload = () => {
   colNum = parseInt(widthInput.value);
-  rowNum = parseInt(heighthInput.value);
+  rowNum = parseInt(heightInput.value);
   NewGame();
 };
 
-// window.onbeforeunload = function () {
-//   return "Are you sure you want to leave?";
-// };
+window.onbeforeunload = function () {
+  return "Are you sure you want to leave?";
+};
 
 function Start() {
   delay = intervalInput.value;
@@ -82,10 +83,10 @@ function loadGame(data) {
   colNum = data.length;
   rowNum = data[0].length;
   widthInput.value = colNum;
-  heighthInput.value = rowNum;
+  heightInput.value = rowNum;
   NewGame();
   tiles = data;
-  renderBoard();
+  canvas.draw();
 }
 
 loadButton.addEventListener("click", () => {
@@ -162,9 +163,11 @@ helpButton.addEventListener("click", showHelp);
 
 function NewGame() {
   colNum = parseInt(widthInput.value);
-  rowNum = parseInt(heighthInput.value);
+  rowNum = parseInt(heightInput.value);
   height = tileSize * rowNum + 1;
   width = tileSize * colNum + 1;
+  console.log(width,height);
+  
   for (let x = 0; x < colNum; x++) {
     tiles[x] = [];
     newTiles[x] = [];
@@ -173,14 +176,21 @@ function NewGame() {
       newTiles[x][y] = false;
     }
   }
-  gameArea.height = height;
-  gameArea.width = width;
-  renderBoard();
+  canvas = new ZoomPanCanvas(
+    gameArea,
+    (ctx, scale, ox, oy) => {
+      renderBoard(ctx, tiles, width, height, lineWidth);
+    },
+    width,
+    height
+  );
+  canvas.setSize(width,height);
+  canvas.draw();
 }
 
 function HandLeNewButton() {
   colNum = parseInt(widthInput.value);
-  rowNum = parseInt(heighthInput.value);
+  rowNum = parseInt(heightInput.value);
   NewGame();
 }
 newButton.addEventListener("click", HandLeNewButton);
@@ -198,7 +208,7 @@ function HandleNextGeneration() {
     }
   }
   [tiles, newTiles] = [newTiles, tiles];
-  renderBoard();
+  canvas.draw();
 }
 nextGenButton.addEventListener("click", HandleNextGeneration);
 
@@ -223,13 +233,11 @@ function HandleCellClick(event) {
   let currentTile = tiles[x][y];
   console.log(tiles[x][y]);
   if (currentTile) {
-    colorTile(x, y, "white");
     tiles[x][y] = false;
   } else {
-    colorTile(x, y, "black");
     tiles[x][y] = true;
   }
-  renderBoard();
+  canvas.draw();
 }
 
 
@@ -262,16 +270,15 @@ function HandleRightClick(event) {
 
 gameArea.addEventListener("contextmenu", HandleRightClick);
 
-function renderBoard() {
-  ctx.clearRect(0, 0, width, height);
+const renderBoard = (ctx, tiles, width, height, lineWidth) => {
   ctx.beginPath();
 
-  for (let i = 0; i < rowNum + 1; i++) {
+  for (let i = 0; i < tiles.length + 1; i++) {
     ctx.moveTo(0, i * tileSize);
     ctx.lineTo(width, i * tileSize);
   }
 
-  for (let i = 0; i < colNum + 1; i++) {
+  for (let i = 0; i < tiles[0].length + 1; i++) {
     ctx.moveTo(i * tileSize, 0);
     ctx.lineTo(i * tileSize, height);
   }
@@ -280,28 +287,24 @@ function renderBoard() {
   ctx.strokeStyle = "lightgray";
   ctx.stroke();
 
-  for (let x = 0; x < colNum; x++) {
-    for (let y = 0; y < rowNum; y++) {
+  for (let x = 0; x < tiles.length; x++) {
+    for (let y = 0; y < tiles[x].length; y++) {
       let currentTile = tiles[x][y];
       if (currentTile) {
-        colorTile(x, y, "black");
+        colorTile(ctx, x, y, "black");
       }
     }
   }
-}
+};
 
 function getClickedTilePos(event) {
-  let rect = gameArea.getBoundingClientRect();
-  let x = event.clientX - rect.left;
-  let y = event.clientY - rect.top;
-  console.log(`x: ${x}`);
-  console.log(`y: ${y}`);
-  let realX = Math.floor(x / tileSize);
-  let realY = Math.floor(y / tileSize);
+  const { x, y } = canvas.getWorldCoords(event);
+  const realX = Math.floor(x / tileSize);
+  const realY = Math.floor(y / tileSize);
   return [realX, realY];
 }
 
-function colorTile(x, y, color) {
+function colorTile(ctx, x, y, color) {
   ctx.fillStyle = color;
   ctx.fillRect(
     x * tileSize + Math.ceil(lineWidth / 2),
