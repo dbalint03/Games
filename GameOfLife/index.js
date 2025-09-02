@@ -37,6 +37,9 @@ let newTiles = [];
 let interval = null;
 let delay = 100;
 let isRunning = false;
+
+
+
 window.onload = () => {
   colNum = parseInt(widthInput.value);
   rowNum = parseInt(heighthInput.value);
@@ -206,8 +209,16 @@ window.addEventListener("keydown", function (e) {
   }
 });
 
+
+let isLeftButtonDown = false;
+let lastCellTouched = { x: -1, y: -1 };
+
 function HandleCellClick(event) {
   const [x, y] = getClickedTilePos(event);
+  if (lastCellTouched.x === x && lastCellTouched.y === y) {
+    return;
+  }
+  lastCellTouched = { x, y };
   console.log(`x:${x}, y:${y}`);
   let currentTile = tiles[x][y];
   console.log(tiles[x][y]);
@@ -220,7 +231,28 @@ function HandleCellClick(event) {
   }
   renderBoard();
 }
+
+
 gameArea.addEventListener("click", HandleCellClick);
+
+gameArea.addEventListener("mousedown", (event) => {
+  if (event.button !== 0) {
+    return;
+  }
+  isLeftButtonDown = true;
+});
+gameArea.addEventListener("mouseup", (event) => {
+  if (event.button !== 0) {
+    return;
+  }
+  lastCellTouched = { x: -1, y: -1 };
+  isLeftButtonDown = false;
+});
+gameArea.addEventListener("mousemove", (event) => {
+  if (isLeftButtonDown) {
+    HandleCellClick(event);
+  }
+});
 
 function HandleRightClick(event) {
   event.preventDefault();
